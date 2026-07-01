@@ -1,7 +1,7 @@
 <?php
 
+use App\Http\Controllers\ItemController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,4 +14,9 @@ use App\Http\Controllers\TestController;
 |
 */
 
-Route::get('/', [TestController::class, 'index']);
+Route::get('/', [ItemController::class, 'index']);
+Route::get('/item/{id}', [ItemController::class, 'show']);
+Route::get('/purchase/{id}', [ItemController::class, 'purchase']);
+Route::post('/purchase/{id}', [ItemController::class, 'buy']);
+Route::get('/address/{id}', [ItemController::class, 'editAddress']);
+Route::post('/address/{id}', [ItemController::class, 'updateAddress']);
