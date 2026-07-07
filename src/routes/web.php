@@ -20,3 +20,8 @@ Route::get('/purchase/{id}', [ItemController::class, 'purchase']);
 Route::post('/purchase/{id}', [ItemController::class, 'buy']);
 Route::get('/address/{id}', [ItemController::class, 'editAddress']);
 Route::post('/address/{id}', [ItemController::class, 'updateAddress']);
+Route::get('/sell', [ItemController::class, 'create'])->name('item.create');
+Route::post('/sell', [ItemController::class, 'store'])->name('item.store');
+Route::get('/mypage', [ItemController::class, 'mypage']);
+Route::post('/item/{id}/comment', [ItemController::class, 'storeComment']);
+Route::post('/item/{id}/like', [ItemController::class, 'toggleLike']);

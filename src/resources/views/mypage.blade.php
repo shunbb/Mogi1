@@ -3,30 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>フリマアプリ - 商品一覧</title>
+    <title>マイページ - COACHTECH</title>
     <style>
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #fff; margin: 0; padding: 0; color: #000; }
+        
+        /* ヘッダーデザイン統一 */
         header { background-color: #000; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
         header h1 { margin: 0; }
         header h1 a { color: #fff; text-decoration: none; font-size: 24px; font-weight: bold; }
         .header-nav { display: flex; align-items: center; gap: 20px; }
-        .search-form { margin: 0; }
         .search-bar { padding: 8px 15px; width: 300px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
         .nav-link { color: #fff; text-decoration: none; font-size: 14px; font-weight: bold; }
         .btn-sell-nav { background-color: #fff; border: 1px solid #fff; padding: 6px 20px; border-radius: 4px; text-decoration: none; color: #000; font-size: 14px; font-weight: bold; }
 
-        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        h2 { border-bottom: 2px solid #ff4d4f; padding-bottom: 8px; margin-bottom: 24px; color: #333; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; transition: transform 0.2s; border: 1px solid #eee; position: relative; }
-        .card:hover { transform: translateY(-4px); }
-        
-        .card-img { width: 100%; height: 200px; background-color: #e8e8e8; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        /* ユーザープロフィール表示エリア */
+        .profile-section { display: flex; align-items: center; gap: 25px; margin-bottom: 40px; }
+        .profile-avatar { width: 80px; height: 80px; background-color: #e5e5e5; border-radius: 50%; border: 1px solid #ccc; }
+        .user-name { font-size: 24px; font-weight: bold; margin: 0; }
+
+        /* タブメニュー（出品した商品 / 購入した商品） */
+        .tab-menu { display: flex; border-bottom: 1px solid #ccc; margin-bottom: 30px; padding: 0; list-style: none; }
+        .tab-item { margin-right: 40px; padding-bottom: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .tab-item a { text-decoration: none; color: #666; }
+        .tab-item.active { border-bottom: 2px solid #ff4d4f; }
+        .tab-item.active a { color: #ff4d4f; }
+
+        /* 商品グリッド配置 */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .card { background: #fff; border-radius: 4px; overflow: hidden; transition: transform 0.2s; border: 1px solid #eee; position: relative; }
+        .card:hover { transform: translateY(-3px); }
+        .card-img { width: 100%; height: 180px; background-color: #e5e5e5; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         .card-img img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .card-content { padding: 15px; }
-        .item-name { font-size: 16px; font-weight: bold; margin: 0 0 8px 0; color: #333; word-break: break-all; }
-        .item-price { font-size: 18px; color: #ff4d4f; font-weight: bold; margin: 0; }
+        .card-content { padding: 12px; }
+        .item-name { font-size: 15px; font-weight: bold; margin: 0 0 6px 0; color: #333; word-break: break-all; }
+        .item-price { font-size: 16px; color: #000; font-weight: bold; margin: 0; }
         
         .sold-label {
             position: absolute;
@@ -34,11 +46,10 @@
             left: 10px;
             background-color: rgba(255, 77, 79, 0.9);
             color: #fff;
-            padding: 5px 12px;
+            padding: 4px 10px;
             font-weight: bold;
             border-radius: 4px;
-            font-size: 12px;
-            letter-spacing: 0.5px;
+            font-size: 11px;
             z-index: 10;
         }
     </style>
@@ -48,10 +59,7 @@
 <header>
     <h1><a href="/">COACHTECH</a></h1>
     <div class="header-nav">
-        <form action="/" method="GET" class="search-form">
-            <input type="text" name="search" class="search-bar" placeholder="なにをお探しですか？" value="{{ $keyword ?? '' }}">
-        </form>
-        
+        <input type="text" class="search-bar" placeholder="なにをお探しですか？">
         @auth
             <a href="/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-link">ログアウト</a>
             <a href="/mypage" class="nav-link">マイページ</a>
@@ -65,17 +73,28 @@
 </header>
 
 <div class="container">
-    @if(!empty($keyword))
-        <h2>「{{ $keyword }}」の検索結果</h2>
-    @else
-        <h2>おすすめ商品一覧</h2>
-    @endif
+    <div class="profile-section">
+        <div class="profile-avatar"></div>
+        <h2 class="user-name">{{ $user->name }}</h2>
+    </div>
+
+    <ul class="tab-menu">
+        <li class="tab-item {{ $tab === 'sell' ? 'active' : '' }}">
+            <a href="/mypage?page=sell">出品した商品</a>
+        </li>
+        <li class="tab-item {{ $tab === 'buy' ? 'active' : '' }}">
+            <a href="/mypage?page=buy">購入した商品</a>
+        </li>
+    </ul>
 
     <div class="grid">
-        @forelse($items as $item)
+        @php
+            $displayItems = $tab === 'sell' ? $sellItems : $buyItems;
+        @endphp
+
+        @forelse($displayItems as $item)
             <a href="/item/{{ $item->id }}" style="text-decoration: none; color: inherit;">
                 <div class="card">
-                    
                     @if(isset($item->order_id) && $item->order_id)
                         <div class="sold-label">Sold</div>
                     @endif
@@ -95,7 +114,7 @@
                 </div>
             </a>
         @empty
-            <p>該当する商品がありません。</p>
+            <p style="color: #666; font-size: 14px;">該当する商品がありません。</p>
         @endforelse
     </div>
 </div>
